@@ -1,0 +1,16 @@
+<html>
+
+<body>
+    <form id="login" method="GET" action="{{context.url}}">
+    </form>
+</body>
+<script>
+    window.onload = function () {
+        setTimeout(function () {
+            var login_form = document.getElementById('login')
+            login_form.submit()
+        }, 1000)
+    }
+</script>
+
+</html>
