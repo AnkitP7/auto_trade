@@ -1,19 +1,22 @@
+
 import requests
-from kiteconnect import KiteConnect
+import json
 from flask import render_template
+from kiteconnect import KiteConnect
 
 class RequestHelper:
 
     KITE_TOKEN_URL = "https://api.kite.trade/session/token"
 
     def request_for_token(self, data):
+        from main import app
         """
         The function `request_for_token` sends a request to obtain an access token and updates the data
         with the response if the status is 200, then returns a session object.
         :return: the result of the `kite_helper._session(data)` function call.
         """
-        access_token = request.post(KITE_TOKEN_URL, data={
-            'api_key': env_config['APP_TOKEN'],
+        access_token = requests.post(self.KITE_TOKEN_URL, data={
+            'api_key': app['API_KEY'],
             'request_token': data['request_token']
         })
         if access_token.status == 200:

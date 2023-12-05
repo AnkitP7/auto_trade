@@ -3,7 +3,8 @@ from dotenv import dotenv_values
 from helpers.kite_connect import KiteConnectHelper
 
 app = Flask(__name__, static_folder='static', template_folder='static')
-env_config = dotenv_values()
+app.config.update(dotenv_values())
+
 kite_helper = None
 
 # @app.route("/")
@@ -18,7 +19,7 @@ def login():
     :return: The login function is returning the result of the `_connect()` method of the `kite_helper`
     object.
     """
-    kite_helper = KiteConnectHelper(env_config['API_KEY'])
+    kite_helper = KiteConnectHelper(app['API_KEY'])
     return kite_helper._connect()
 
 @app.route("/connect/login/request/<data>")
