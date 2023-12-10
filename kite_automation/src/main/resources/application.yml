@@ -1,0 +1,30 @@
+spring:
+  autoconfigure:
+    exclude:
+      - ${EXCLUDE_AUTO_CONFIGURE}
+  datasource:
+    url: jdbc:mariadb://localhost:3306/market_data?autoReconnect=true&useSSL=false
+    driverClassName: org.mariadb.jdbc.Driver
+    username: root
+    password: root
+    hikari:
+      autoCommit: true
+      connectionTimeout: 5000
+      idleTimeout: 10000
+      keepaliveTime: 30000
+      maxLifetime: 60000
+      minimumIdle: 5
+      maximumPoolSize: 10
+      prepStmtCacheSize: 250
+      prepStmtCacheSqlLimit: 2048
+      cachePrepStmts: true
+      useServerPrepStmts: true
+      useLocalSessionState: true
+      rewriteBatchedStatements: true
+      cacheResultSetMetadata: true
+      cacheServerConfiguration: true
+      elideSetAutoCommits: true
+      maintainTimeStats: false
+      useUnbufferedIO: false
+      useReadAheadInput: false
+
