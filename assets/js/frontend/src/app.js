@@ -1,12 +1,15 @@
-import React, { Component} from "react";
-import Dashboard from "./layouts/dashboard";
+import Routes from 'routes';
+import ThemeCustomization from 'themes';
+import ScrollTop from 'components/ScrollTop';
 
-class App extends Component{
-  render(){
-    return(
-      <Dashboard />
-    );
-  }
-}
+// ==============================|| APP - THEME, ROUTER, LOCAL  ||============================== //
+
+const App = () => (
+  <ThemeCustomization>
+    <ScrollTop>
+      <Routes />
+    </ScrollTop>
+  </ThemeCustomization>
+);
 
 export default App;

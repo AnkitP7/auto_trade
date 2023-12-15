@@ -1,0 +1,37 @@
+from marshmallow import ValidationError
+import traceback
+from flask import Blueprint, request, jsonify
+from models.app_models import AutoConfig, db
+from schema.configuration import ConfigurationSchema, Configuration
+from helpers.authorize import authorization_required
+
+configuration = Blueprint('configuration', __name__,)
+
+
+@configuration.route(f"/configuration/create/", methods=['POST'])
+@authorization_required
+def create_configuration(data):
+    try:
+        configuration_schema = ConfigurationSchema().load(request.json)
+        configuration_schema['user_id'] = data.id
+        db.session.add(AutoConfig(**configuration_schema))
+        db.session.commit()
+        return {"status": True, "data": configuration_schema, "error":{}}, 200
+    except Exception as e:
+        traceback.print_exc()
+        if isinstance(e, ValidationError):
+            return jsonify({"status": False, "error": {"message": e.messages, "code": "COE2"}}), 400
+        return jsonify({"status": False, "error": {"message": "Exception occurred::COCE1", "code": "COCE1"}})
+
+
+@configuration.route("/configuration/get/", methods=['GET'])
+@authorization_required
+def get_configuration(data):
+    try:
+        return {
+            'status': True,
+            'data': Configuration().dump(AutoConfig().query.filter_by(user_id=data.id).all(), many=True)
+        }
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({"status": False, "error": {"message": "Exception occurred::", "code": "COGE2"}})
