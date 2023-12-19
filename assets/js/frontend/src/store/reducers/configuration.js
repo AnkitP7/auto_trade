@@ -1,6 +1,6 @@
 // types
 import { createSlice } from '@reduxjs/toolkit';
-import { getConfiguration, createConfiguration } from 'services/configuration';
+import { getConfiguration, createConfiguration, updateConfiguration } from 'services/configuration';
 
 // initial state
 const initialState = {
@@ -28,7 +28,8 @@ const configuration = createSlice({
         drawerAction: (state, action) => {
             state.create = {
                 ...state.create,
-                isVisible: action.payload,
+                isVisible: action.payload.visible,
+                actionType: action.payload.actionType,
             }
         },
         editAction: (state, action) => {
@@ -59,15 +60,31 @@ const configuration = createSlice({
         })
         builder.addCase(createConfiguration.fulfilled, (state, action) => {
             state.create.isLoading = false;
-            if (action.payload.status){
+            if (action.payload.status) {
                 state.create.data = action.payload.data;
                 state.create.isVisible = false;
             }
-            else{
+            else {
                 state.create.error = action.payload.error;
             }
         })
         builder.addCase(createConfiguration.rejected, (state, action) => {
+            state.create.error = action.payload.error;
+        })
+        builder.addCase(updateConfiguration.pending, (state, action) => {
+            state.create.isLoading = true;
+        })
+        builder.addCase(updateConfiguration.fulfilled, (state, action) => {
+            state.create.isLoading = false;
+            if (action.payload.status) {
+                state.create.data = {}
+                state.create.isVisible = false;
+            }
+            else {
+                state.create.error = action.payload.error;
+            }
+        })
+        builder.addCase(updateConfiguration.rejected, (state, action) => {
             state.create.error = action.payload.error;
         })
     }

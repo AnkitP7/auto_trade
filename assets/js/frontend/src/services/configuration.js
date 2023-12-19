@@ -29,4 +29,17 @@ const createConfiguration = createAsyncThunk('configuration/create', async (quer
     return response?.json();
 });
 
-export { getConfiguration, createConfiguration };
+const updateConfiguration = createAsyncThunk('configuration/edit', async (queryData, { getState }) => {
+    let url = `${process.env.REACT_APP_BASE_URL}/configuration/edit/`;
+    const response = await fetch(url, {
+        method: 'PUT',
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `token ${JSON.parse(ls.get('authorization')).token}`
+        },
+        body: JSON.stringify(queryData)
+    })
+    return response?.json();
+});
+
+export { getConfiguration, createConfiguration, updateConfiguration };

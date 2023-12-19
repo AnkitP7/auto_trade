@@ -108,8 +108,8 @@ const SettingsForm = (props) => {
                 <Stack spacing={1}>
                     <InputLabel htmlFor="isActive">Active Account</InputLabel>
                     <Switch
-                        checked={Boolean(values.is_active)}
-                        onChange={(e) => setFieldValue('is_active', e.target.value == "on" ? 1 : 0)}
+                        checked={values.is_active}
+                        onChange={(e) => setFieldValue('is_active', e.target.checked)}
                         inputProps={{ 'aria-label': 'controlled' }}
                     />
                     {touched.is_active && errors.is_active && (

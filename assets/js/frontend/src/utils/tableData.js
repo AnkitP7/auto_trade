@@ -6,19 +6,19 @@ const DATA_CONFIG = {
                 label: 'Tag',
             },
             {
-                id: 'index_name',
+                id: 'indexName',
                 label: 'Index',
             },
             {
-                id: 'days_of_week',
+                id: 'daysOfWeek',
                 label: 'Days of Week',
             },
             {
-                id: 'start_time',
+                id: 'startTime',
                 label: 'Start Time',
             },
             {
-                id: 'end_time',
+                id: 'endTime',
                 label: 'End Time',
             },
             {
@@ -26,20 +26,20 @@ const DATA_CONFIG = {
                 label: 'Quantity',
             },
             {
-                id: 'entry_criteria',
+                id: 'entryCriteria',
                 label: 'Entry criteria',
             },
             {
-                id: 'entry_criteria_value',
+                id: 'entryCriteriaValue',
                 label: 'Entry Criteria Value',
             },
             {
-                id: 'stop_loss_type',
+                id: 'stopLossType',
                 label: 'Stop Loss Type',
-                render: (row) => row.stop_loss_type ? "Percentage" : "Flat"
+                render: (row) => row.stopLossType ? "Percentage" : "Flat"
             },
             {
-                id: 'stop_loss_value',
+                id: 'stopLossValue',
                 label: 'Stop Loss Value',
             },
             // {

@@ -14,22 +14,24 @@ import { Formik } from 'formik';
 import DataTable from 'components/dataTable';
 import { drawerAction, editAction } from 'store/reducers/configuration';
 import { PlusOutlined } from '@ant-design/icons';
-import { getConfiguration, createConfiguration } from 'services/configuration';
+import { getConfiguration, createConfiguration, updateConfiguration } from 'services/configuration';
 import { DATA_CONFIG } from 'utils/tableData';
 
 import dayjs from 'dayjs';
-var customParseFormat = require('dayjs/plugin/customParseFormat')
-dayjs.extend(customParseFormat)
+var customParseFormat = require('dayjs/plugin/customParseFormat');
+dayjs.extend(customParseFormat);
+
+const DEFAULT_ACTION = 'Create';
 
 const Configuration = () => {
 
   const dispatch = useDispatch();
-  const state = useSelector((state) => state.configuration.list);
+  const state = useSelector((state) => state.configuration);
   const actions = [
     {
       id: 'is_enabled',
       label: 'Active',
-      render: (row) => <Chip style={{ borderRadius: 50 }} icon={row.isEnabled ? <CheckCircleIcon /> : <HighlightOffIcon />} label={row.is_enabled ? "Yes" : "No"} />
+      render: (row) => <Chip style={{ borderRadius: 50 }} icon={row.isEnabled ? <CheckCircleIcon /> : <HighlightOffIcon />} label={row.isEnabled ? "Yes" : "No"} />
     },
     {
       id: 'actions',
@@ -51,7 +53,7 @@ const Configuration = () => {
 
   let dataTableProps = {
     columns,
-    rows: state.data,
+    rows: state.list.data,
   }
 
   useEffect(() => {
@@ -61,12 +63,12 @@ const Configuration = () => {
   return (
     <Grid container rowSpacing={2} columnSpacing={2} justifyContent={'flex-end'}>
       <Grid item>
-        <Button variant="contained" startIcon={<PlusOutlined />} onClick={() => { dispatch(drawerAction(true)) }}>
+        <Button variant="contained" startIcon={<PlusOutlined />} onClick={() => { dispatch(drawerAction({ visible: true, actionType: DEFAULT_ACTION })) }}>
           Create
         </Button>
       </Grid>
       <Grid item lg={24} md={12} xs={6}>
-        {state.isLoading ? <LinearProgress /> : null}
+        {state.list.isLoading ? <LinearProgress /> : null}
         <DataTable {...dataTableProps} />
       </Grid>
       <Grid item lg={24} md={12} xs={6}>
@@ -80,6 +82,10 @@ const ConfigurationForm = () => {
 
   const dispatch = useDispatch();
   const state = useSelector((state) => state.configuration.create);
+  const ACTION_MAP = {
+    'Edit': 1,
+    'Create': 0,
+  }
 
   return (
     <SwipeableDrawer
@@ -95,19 +101,18 @@ const ConfigurationForm = () => {
       anchor={"right"}
       open={state.isVisible}
       hideBackdrop={true}
-      onClose={() => dispatch(drawerAction(false))}
-      onOpen={() => dispatch(drawerAction(true))}
+      onClose={() => dispatch(drawerAction({ visible: false, actionType: DEFAULT_ACTION }))}
+      onOpen={() => dispatch(drawerAction({ visible: true, actionType: DEFAULT_ACTION }))}
     >
       <Card style={{ margin: 30, border: 'none', boxShadow: "none" }}>
         <Formik
+          enableReinitialize
           initialValues={{
             tag: '',
             indexName: '',
             daysOfWeek: 1,
-            startTime: null,
-            formattedStartTime: null,
-            endTime: null,
-            formattedEndTime: null,
+            formattedStartTime: ACTION_MAP[state.actionType] ? state.data.startTime : '',
+            formattedEndTime: ACTION_MAP[state.actionType] ? state.data.endTime : '',
             quantity: null,
             entryCriteria: null,
             entryCriteriaValue: null,
@@ -115,13 +120,15 @@ const ConfigurationForm = () => {
             stopLossValue: null,
             isEnabled: false,
             ...state.data,
+            startTime: ACTION_MAP[state.actionType] ? dayjs(state.data.startTime, "HH:mm:ss") : '',
+            endTime: ACTION_MAP[state.actionType] ? dayjs(state.data.endTime, "HH:mm:ss") : '',
           }}
           onSubmit={async (values, { setErrors, setStatus, setSubmitting }) => {
             try {
-              dispatch(createConfiguration(values))
-              if (state.data) {
-                dispatch(getConfiguration())
-              }
+              if (ACTION_MAP[state.actionType])
+                dispatch(updateConfiguration(values))
+              else
+                dispatch(createConfiguration(values))
               setStatus({ success: false });
               setSubmitting(false);
             } catch (err) {
@@ -201,7 +208,7 @@ const ConfigurationForm = () => {
                         id="startTime"
                         ampm={false}
                         value={values.startTime}
-                        onChange={(value) => { setFieldValue("startTime", value, true); setFieldValue("formattedStartTime", dayjs(value).format('HH:MM:ss')) }}
+                        onChange={(value) => { console.log(dayjs(value).format('HH:MM:ss')); setFieldValue("startTime", value, true); setFieldValue("formattedStartTime", dayjs(value).format('HH:mm:ss')) }}
                       />
                     </LocalizationProvider>
                     {touched.startTime && errors.startTime && (
@@ -220,7 +227,7 @@ const ConfigurationForm = () => {
                         id="endTime"
                         ampm={false}
                         value={values.endTime}
-                        onChange={(value) => { setFieldValue("endTime", value, true); setFieldValue("formattedEndTime", dayjs(value).format('HH:MM:ss')) }}
+                        onChange={(value) => { setFieldValue("endTime", value, true); setFieldValue("formattedEndTime", dayjs(value).format('HH:mm:ss')) }}
                       />
                     </LocalizationProvider>
                     {touched.endTime && errors.endTime && (
@@ -295,7 +302,7 @@ const ConfigurationForm = () => {
                     <InputLabel htmlFor="Stop Loss Type">Stop Loss type</InputLabel>
                     <Select
                       name="stopLossType"
-                      value={values.stopLossType}
+                      value={Number(values.stopLossType)}
                       label="Age"
                       onChange={handleChange}
                     >
@@ -332,10 +339,12 @@ const ConfigurationForm = () => {
                 <Grid item xs={12} sx={{ mt: -1 }} lg={24}>
                   <Stack direction="row">
                     <FormControlLabel
+                      name="isEnabled"
                       value={values.isEnabled}
                       control={
-                        <Switch defaultChecked size="large" handleChange={handleChange} />
+                        <Switch checked={values.isEnabled} size="large" />
                       }
+                      onChange={(e) => setFieldValue('isEnabled', e.target.checked )}
                       label={<Typography variant="h6">Enabled</Typography>}
                     />
                   </Stack>
