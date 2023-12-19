@@ -5,6 +5,7 @@ from models.app_models import db, ma
 from flask_migrate import Migrate  
 from controllers.authentication import authentication
 from controllers.configuration import configuration
+from controllers.settings import settings
 
 def _load_extensions(app):
     app.config.update(dotenv_values())
@@ -12,6 +13,7 @@ def _load_extensions(app):
     migrate = Migrate(app, db)
     app.register_blueprint(authentication)
     app.register_blueprint(configuration)
+    app.register_blueprint(settings)
     if app.config.get('APP_ENV') != 'prod':
         cors = CORS(app)
     ma.init_app(app)

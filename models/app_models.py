@@ -21,6 +21,22 @@ class User(db.Model):
     def __repr__(self):
         return f'{self.username} - {self.email}'
 
+class UserSettings(db.Model):
+    
+    id = db.Column(db.Integer, primary_key=True)
+    trade_user_id = db.Column(db.String(255), nullable=True, )
+    trade_api_key = db.Column(db.String(255), nullable=True, )
+    trade_vendor = db.Column(db.String(255), nullable=True, default='Zerodha')
+    is_verified = db.Column(db.Boolean, default=False)
+    is_active = db.Column(db.Boolean, default=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    user = db.relationship(User)
+    created_datetime = db.Column(
+        db.DateTime, nullable=False, default=datetime.utcnow)
+    updated_datetime = db.Column(
+        db.DateTime, nullable=False, default=datetime.utcnow)
+
+
 class AutoConfig(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
@@ -40,6 +56,7 @@ class AutoConfig(db.Model):
     hedge_distance = db.Column(db.Integer, nullable=True, default=0)
     hedge_round_of_multiple = db.Column(db.Integer, nullable=True, default=100)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    user = db.relationship(User)
     created_datetime = db.Column(
         db.DateTime, nullable=False, default=datetime.utcnow)
 

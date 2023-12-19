@@ -9,10 +9,9 @@ import TablePagination from '@mui/material/TablePagination';
 import TableRow from '@mui/material/TableRow';
 
 export default function DataTable({ columns, rows }) {
+
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
-
-
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -48,11 +47,13 @@ export default function DataTable({ columns, rows }) {
                   <TableRow hover role="checkbox" tabIndex={-1} key={row.code}>
                     {columns.map((column) => {
                       const value = row[column.id];
+                      const render = column?.render;
                       return (
                         <TableCell key={column.id} align={column.align}>
                           {column.format && typeof value === 'number'
                             ? column.format(value)
                             : value}
+                          {render ? render(row) : null}
                         </TableCell>
                       );
                     })}

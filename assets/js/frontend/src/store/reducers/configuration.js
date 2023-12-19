@@ -7,11 +7,14 @@ const initialState = {
     list: {
         isLoading: false,
         data: [],
+        error: {},
     },
     create: {
         isLoading: false,
         isVisible: false,
+        actionType: 'Create',
         data: {},
+        error: {},
     },
 };
 
@@ -27,6 +30,14 @@ const configuration = createSlice({
                 ...state.create,
                 isVisible: action.payload,
             }
+        },
+        editAction: (state, action) => {
+            state.create = {
+                ...state.create,
+                data: action.payload,
+                actionType: 'Edit',
+                isVisible: true,
+            }
         }
     },
     extraReducers: (builder) => {
@@ -38,27 +49,30 @@ const configuration = createSlice({
             if (action.payload.status)
                 state.list.data = action.payload.data;
             else
-                state.error = { ...action.payload.error, open: true, message: action.payload.error.message, }
+                state.list.error = action.payload.error;
         })
         builder.addCase(getConfiguration.rejected, (state, action) => {
-            state.error = action.payload;
+            state.list.error = action.payload;
         })
         builder.addCase(createConfiguration.pending, (state, action) => {
             state.create.isLoading = true;
         })
         builder.addCase(createConfiguration.fulfilled, (state, action) => {
             state.create.isLoading = false;
-            if (action.payload.status)
+            if (action.payload.status){
                 state.create.data = action.payload.data;
-            else
-                state.error = { ...action.payload.error, open: true, message: action.payload.error.message, }
+                state.create.isVisible = false;
+            }
+            else{
+                state.create.error = action.payload.error;
+            }
         })
         builder.addCase(createConfiguration.rejected, (state, action) => {
-            state.error = action.payload;
+            state.create.error = action.payload.error;
         })
     }
 });
 
 export default configuration.reducer;
 
-export const { closeSnackBar, drawerAction } = configuration.actions;
+export const { closeSnackBar, drawerAction, editAction } = configuration.actions;

@@ -5,9 +5,10 @@ import { combineReducers } from 'redux';
 import menu from './menu';
 import authentication from './authentication';
 import configuration from './configuration';
+import settings from './settings';
 
 // ==============================|| COMBINE REDUCERS ||============================== //
 
-const reducers = combineReducers({ menu, authentication, configuration });
+const reducers = combineReducers({ menu, authentication, configuration, settings });
 
 export default reducers;

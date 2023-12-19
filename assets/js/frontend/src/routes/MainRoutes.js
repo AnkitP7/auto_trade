@@ -9,6 +9,7 @@ const DashboardDefault = Loadable(lazy(() => import('pages/dashboard')));
 
 const Configuration = Loadable(lazy(() => import('pages/extra-pages/configuration')));
 const Strategy = Loadable(lazy(() => import('pages/extra-pages/strategy')));
+const Settings = Loadable(lazy(() => import('pages/extra-pages/settings')));
 
 
 // ==============================|| MAIN ROUTING ||============================== //
@@ -38,6 +39,10 @@ const MainRoutes = {
       path: 'strategy',
       element: <Strategy />
     },
+    {
+      path: 'settings',
+      element: <Settings />
+    }
   ]
 };
 

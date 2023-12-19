@@ -1,7 +1,10 @@
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 // material-ui
-import { Grid, Stack, Typography, InputLabel, OutlinedInput, FormControlLabel, Switch, Button, Select, MenuItem, SwipeableDrawer, Card, CircularProgress, LinearProgress } from '@mui/material';
+import { Grid, Stack, Typography, InputLabel, OutlinedInput, FormControlLabel, Switch, Button, Select, MenuItem, SwipeableDrawer, Card, CircularProgress, LinearProgress, FormHelperText, Chip, IconButton } from '@mui/material';
+import EditIcon from '@mui/icons-material/Edit';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import HighlightOffIcon from '@mui/icons-material/HighlightOff';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { TimePicker } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
@@ -9,9 +12,11 @@ import AnimateButton from 'components/@extended/AnimateButton';
 import { Formik } from 'formik';
 // project import
 import DataTable from 'components/dataTable';
-import { drawerAction } from 'store/reducers/configuration';
+import { drawerAction, editAction } from 'store/reducers/configuration';
 import { PlusOutlined } from '@ant-design/icons';
 import { getConfiguration, createConfiguration } from 'services/configuration';
+import { DATA_CONFIG } from 'utils/tableData';
+
 import dayjs from 'dayjs';
 var customParseFormat = require('dayjs/plugin/customParseFormat')
 dayjs.extend(customParseFormat)
@@ -20,52 +25,29 @@ const Configuration = () => {
 
   const dispatch = useDispatch();
   const state = useSelector((state) => state.configuration.list);
-  const columns = [
-    {
-      id: 'tag',
-      label: 'Tag',
-    },
-    {
-      id: 'index_name',
-      label: 'Index',
-    },
-    {
-      id: 'days_of_week',
-      label: 'Days of Week',
-    },
-    {
-      id: 'start_time',
-      label: 'Start Time',
-    },
-    {
-      id: 'end_time',
-      label: 'End Time',
-    },
-    {
-      id: 'quantity',
-      label: 'Quantity',
-    },
-    {
-      id: 'entry_criteria',
-      label: 'Entry criteria',
-    },
-    {
-      id: 'entry_criteria_value',
-      label: 'Entry Criteria Value',
-    },
-    {
-      id: 'stop_loss_type',
-      label: 'Stop Loss Type',
-    },
-    {
-      id: 'stop_loss_value',
-      label: 'Stop Loss Value',
-    },
+  const actions = [
     {
       id: 'is_enabled',
-      label: 'Active'
+      label: 'Active',
+      render: (row) => <Chip style={{ borderRadius: 50 }} icon={row.isEnabled ? <CheckCircleIcon /> : <HighlightOffIcon />} label={row.is_enabled ? "Yes" : "No"} />
+    },
+    {
+      id: 'actions',
+      label: 'Actions',
+      render: (row) => {
+        return (
+          <IconButton color='secondary' aria-label="edit" onClick={(e) => {
+            e.preventDefault();
+            dispatch(editAction(row));
+          }}>
+            <EditIcon />
+          </IconButton>
+        )
+      }
     }
-  ]
+  ];
+
+  const columns = [...DATA_CONFIG.configuration.columns, ...actions]
 
   let dataTableProps = {
     columns,
@@ -84,6 +66,7 @@ const Configuration = () => {
         </Button>
       </Grid>
       <Grid item lg={24} md={12} xs={6}>
+        {state.isLoading ? <LinearProgress /> : null}
         <DataTable {...dataTableProps} />
       </Grid>
       <Grid item lg={24} md={12} xs={6}>
@@ -116,7 +99,6 @@ const ConfigurationForm = () => {
       onOpen={() => dispatch(drawerAction(true))}
     >
       <Card style={{ margin: 30, border: 'none', boxShadow: "none" }}>
-        {state.isLoading ? <CircularProgress /> : null}
         <Formik
           initialValues={{
             tag: '',
@@ -132,10 +114,14 @@ const ConfigurationForm = () => {
             stopLossType: null,
             stopLossValue: null,
             isEnabled: false,
+            ...state.data,
           }}
           onSubmit={async (values, { setErrors, setStatus, setSubmitting }) => {
             try {
               dispatch(createConfiguration(values))
+              if (state.data) {
+                dispatch(getConfiguration())
+              }
               setStatus({ success: false });
               setSubmitting(false);
             } catch (err) {
@@ -361,8 +347,9 @@ const ConfigurationForm = () => {
                 )}
                 <Grid item xs={12} lg={12}>
                   <AnimateButton>
-                    <Button disableElevation disabled={isSubmitting} fullWidth size="large" type="submit" variant="contained" color="primary">
-                      Create
+                    <Button variant="contained" disabled={state.isLoading} fullWidth size="large" type="submit" color="primary">
+                      {state.isLoading ? <CircularProgress size={15} /> : null}
+                      {state.actionType}
                     </Button>
                   </AnimateButton>
                 </Grid>

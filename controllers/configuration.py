@@ -28,10 +28,10 @@ def create_configuration(data):
 @authorization_required
 def get_configuration(data):
     try:
-        return {
+        return jsonify({
             'status': True,
             'data': Configuration().dump(AutoConfig().query.filter_by(user_id=data.id).all(), many=True)
-        }
+        }), 200
     except Exception as e:
         traceback.print_exc()
         return jsonify({"status": False, "error": {"message": "Exception occurred::", "code": "COGE2"}})
