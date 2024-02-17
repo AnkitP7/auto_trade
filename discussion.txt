@@ -1,0 +1,12 @@
+strategy executor->
+{
+exit
+pnl
+charges
+post trade analysis
+}
+
+abstract strategy ->
+
+getcharges ->
+

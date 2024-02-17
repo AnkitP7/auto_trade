@@ -1,11 +1,12 @@
+import logging
+
 import pandas as pd
-import numpy as np
 from kiteconnect import KiteConnect
 import datetime
-import time
 import urllib3
 import sys
 import uuid
+import traceback
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
@@ -75,11 +76,17 @@ def check_market_close():
     now = datetime.datetime.now()
     if now.hour > 15:
         return False
-    else if now.hour == 15 and now.minute > 30:
+    elif now.hour == 15 and now.minute > 30:
         return False
-    else
-    return true
+    return True
 
+def exit_position_condition():
+    now = datetime.datetime.now()
+    if now.hour > 15:
+        return False
+    elif now.hour == 15 and now.minute >= 20 and now.minute <= 30:
+        return False
+    return True
 
 # discuss how does the login work with Amit/Santosh
 def login():
@@ -127,10 +134,9 @@ def get_ltp(ticker):
         ltp_dict = kite.ltp(ticker)
         return ltp_dict[ticker]['last_price']
     except Exception as e:
-        :
-    trace = get_stack_trace()
-    print("Failed to fetch ltp: {} and trace is {}".format(e, trace))
-    return None
+        trace = get_stack_trace()
+        print("Failed to fetch ltp: {} and trace is {}".format(e, trace))
+        return None
 
 
 def calculate_symbol_to_be_traded(ticker, expiry, type, strike_price):
@@ -153,10 +159,10 @@ def get_closest_expiry(ticker):
     try:
         kite_df = get_instruments_list_from_kite()
         ticker_df = filter_ticker_from_data(kite_df, ticker, symbol_to_filter)
-        expiry_dates = set(option['expiry'] for option in nifty_options_instruments)
+        expiry_dates = set(option['expiry'] for option in ticker_df)
         current_date = datetime.now()
         closest_expiry = min(expiry_dates, key=lambda x: abs(datetime.strptime(x, "%Y-%m-%d") - current_date))
-        return closet_expiry
+        return closest_expiry
     except:
         trace = get_stack_trace()
         print("Failed to fetch closet expiry: {} and trace is {}".format(e, trace))
@@ -301,27 +307,37 @@ def calculate_pnl():
     return pnl
 
 
-def fetch_order_details():
-    return None
+def fetch_order_details(order_id):
+    try:
+        orders = kite.orders()
+        for order in orders:
+            if(order['order_id'] == order_id):
+                return order
+        return None
+    except Exception as e:
+        trace = get_stack_trace()
+        logging.info("Failed to calculate day's PnL due to: {} and trace is {}".format(e, trace))
+        return None
 
-
+def generate_uuid():
+    return uuid.uuid4().hex
 def get_profile():
     return kite.profile()
 
 
-if __name__ == '__main__':
-    read_config()
-    read_strat_config()
-    login()
-    get_ltp()
-    calculate_atm()
-    get_closet_expiry()
-    place_market_order()
-    place_limit_order()
-    exit_all_positions()
-    calculate_pnl()
-    publish_to_database()
-    send_email()
+# if __name__ == '__main__':
+#     read_config()
+#     read_strat_config()
+#     login()
+#     get_ltp()
+#     calculate_atm()
+#     get_closet_expiry()
+#     place_market_order()
+#     place_limit_order()
+#     exit_all_positions()
+#     calculate_pnl()
+#     publish_to_database()
+#     send_email()
 
 
 
